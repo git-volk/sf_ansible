@@ -1,0 +1,35 @@
+---
+- name: Create user and set up SSH key
+  hosts: test
+  become: yes
+  vars:
+    user_name: user1
+    ssh_public_key: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          31386130393638306435306338363135313831303938326636613664653331623132373635633764
+          3066616162396461373037663063623565393332643138350a376166663861343331356662646531
+          65616530336530316134343730303265333632326366373134393162393637633162643737613631
+          3765373565356564640a303138383735613135303034366430333230333538376337306338663662
+          62363062383331356466623566346132626564613463656464306336623536353063
+  tasks:
+    - name: Ensure user exists
+      ansible.builtin.user:
+        name: "{{ user_name }}"
+        state: present
+        create_home: yes
+
+    - name: Create .ssh directory
+      ansible.builtin.file:
+        path: "/home/{{ user_name }}/.ssh"
+        state: directory
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: '0700'
+
+    - name: Add SSH key
+      ansible.builtin.copy:
+        content: "{{ ssh_public_key }}"
+        dest: "/home/{{ user_name }}/.ssh/id_rsa.pub"
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: '0600'
