@@ -1,0 +1,54 @@
+---
+- name: Install nginx
+  ansible.builtin.package:
+    name: nginx
+    state: present
+
+- name: Install php-fpm and necessary PHP packages
+  ansible.builtin.package:
+    name:
+      - php-fpm
+      - php-mysql
+      - php-cli
+    state: present
+
+- name: Start and enable nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+  notify: Reload nginx
+
+- name: Start and enable php-fpm
+  ansible.builtin.service:
+    name: php8.3-fpm # Update to your actual PHP-FPM service name
+    state: started
+    enabled: yes
+
+- name: Create nginx site configuration
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/default
+  notify: Reload nginx
+
+- name: Create PHP info file
+  ansible.builtin.copy:
+    dest: /var/www/html/index.php
+    content: |
+      <?php phpinfo(); ?>
+    mode: '0644'
+
+- name: Ensure /opt/nginx/ansible directory exists
+  ansible.builtin.file:
+    path: /opt/nginx/ansible
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0777'
+
+- name: Update nginx default site configuration for DocumentRoot
+  ansible.builtin.replace:
+    path: /etc/nginx/sites-available/default
+    regexp: '^\s*root\s+.*;$'
+    replace: '    root /opt/nginx/ansible;'
+  notify: Reload nginx
