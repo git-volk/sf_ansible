@@ -1,0 +1,8 @@
+---
+vsftpd_config:
+  - { option: listen, value: 'YES' }
+  - { option: anonymous_enable, value: 'NO' }
+  - { option: local_enable, value: 'YES' }
+  - { option: write_enable, value: 'YES' }
+  - { option: chroot_local_user, value: 'YES' }
+  - { option: allow_writeable_chroot, value: 'YES' }
