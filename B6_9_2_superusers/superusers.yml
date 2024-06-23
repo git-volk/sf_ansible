@@ -1,0 +1,31 @@
+---
+- name: Configure superusers group and sudo access
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create group superusers
+      ansible.builtin.group:
+        name: superusers
+        state: present
+
+    - name: Create user user2 and add to superusers group
+      ansible.builtin.user:
+        name: user2
+        groups: superusers
+        append: yes
+        state: present
+
+    - name: Create user user3 and add to superusers group
+      ansible.builtin.user:
+        name: user3
+        groups: superusers
+        append: yes
+        state: present
+
+    - name: Allow members of group superusers to become root
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers
+        state: present
+        validate: '/usr/sbin/visudo -cf %s'
+        regexp: '^%superusers'
+        line: '%superusers ALL=(ALL) NOPASSWD:ALL'
