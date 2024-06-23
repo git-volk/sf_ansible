@@ -1,0 +1,6 @@
+---
+dnsmasq_config:
+  - { option: listen-address, value: '127.0.0.1' }
+  - { option: server, value: '8.8.8.8' }
+  - { option: server, value: '8.8.4.4' }
+  - { option: cache-size, value: '1000' }
