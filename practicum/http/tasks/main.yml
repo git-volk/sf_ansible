@@ -1,0 +1,19 @@
+---
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Start and enable nginx service
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Configure nginx to proxy PHP requests to port 9000
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/default
+  notify:
+    - Reload nginx

@@ -1,0 +1,37 @@
+---
+- name: Create new user with SSH key
+  user:
+    name: "{{ user_name }}"
+    state: present
+    create_home: yes
+
+- name: Create .ssh directory
+  file:
+    path: "/home/{{ user_name }}/.ssh"
+    state: directory
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0700'
+
+- name: Generate private key
+  openssl_privatekey:
+    path: "/home/{{ user_name }}/.ssh/id_rsa"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0600'
+
+- name: Generate public key from private key
+  openssl_publickey:
+    path: "/home/{{ user_name }}/.ssh/id_rsa.pub"
+    privatekey_path: "/home/{{ user_name }}/.ssh/id_rsa"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0644'
+
+- name: Copy public key to authorized_keys
+  copy:
+    src: "/home/{{ user_name }}/.ssh/id_rsa.pub"
+    dest: "/home/{{ user_name }}/.ssh/authorized_keys"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0600'
