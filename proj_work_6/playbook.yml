@@ -1,0 +1,44 @@
+---
+- name: Install Docker and PostgreSQL
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install Docker on app group machines
+      hosts: app
+      tasks:
+        - name: Install Docker
+          apt:
+            name: docker.io
+            state: present
+          vars:
+            ansible_python_interpreter: /usr/bin/python3
+
+        - name: Start Docker service
+          service:
+            name: docker
+            state: started
+
+    - name: Install PostgreSQL on database group machines
+      hosts: database
+      tasks:
+        - name: Install PostgreSQL server
+          apt:
+            name: postgresql-{{ postgresql_version }}
+            state: present
+          vars:
+            ansible_python_interpreter: /usr/bin/python3
+
+        - name: Ensure PostgreSQL service is started and enabled
+          service:
+            name: postgresql
+            state: started
+            enabled: true
+
+        - name: Create PostgreSQL data directory
+          file:
+            path: "{{ data_directory }}"
+            state: directory
+            owner: postgres
+            group: postgres
+            mode: '0700'
